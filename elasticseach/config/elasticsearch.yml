@@ -1,0 +1,12 @@
+action.auto_create_index: true
+#script.groovy.sandbox.enabled: true
+##script.engine.groovy.inline.aggs: true
+##Set a custom allowed content length:
+http.max_content_length: 500mb
+cluster.routing.allocation.disk.watermark.low: 90%
+cluster.routing.allocation.disk.watermark.high: 95%
+indices.fielddata.cache.size:  20%
+indices.breaker.fielddata.limit: 60%
+network.host: 0.0.0.0
+discovery.type: single-node
+##xpack.security.enabled: false

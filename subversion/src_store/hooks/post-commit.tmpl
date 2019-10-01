@@ -1,0 +1,9 @@
+!/bin/sh
+
+REPOS="$1"
+REV="$2"
+SVN_PATH = /usr/bin
+WEB_PATH = /opt/wwwroot/src_store
+SVN_USER = bambooes
+SVN_PASS = bB66115385
+svn update $WEB_PATH --username $SVN_USER --password $SVN_PASS --no-auth-cache >> /etc/a.log
