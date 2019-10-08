@@ -47,9 +47,12 @@ services:
         ports: 
             - "6379:6379"
         volumes:
-            - "$PWD/data:/data/"
+            - "$PWD/data/redis:/data/"
+            - "$PWD/conf/redis.conf:/etc/redis/redis.conf"
         networks:
-            - app_net
+            app_net:
+                # 固定子网ip，网段必须在子网络10.10.*.*
+                ipv4_address: 10.10.10.2
         container_name: "compose-redis"
     
     #svn:
