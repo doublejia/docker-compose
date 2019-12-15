@@ -11,9 +11,10 @@ services:
         # 数据卷
         volumes:
             # 映射主机./conf.d目录到容器/etc/nginx/conf.d目录
-            - "$PWD/conf.d:/etc/nginx/conf.d"
-            - "$PWD/html:/usr/share/nginx/html"
-            - "$PWD/nginx/logs:/usr/local/nginx/logs/"
+            - $PWD/conf.d/:/etc/nginx/conf.d/
+            #- $PWD/html/:/usr/share/nginx/html/
+            - $PWD/html/:/var/www/html/
+            - $PWD/logs/nginx/:/usr/local/nginx/logs/
         networks:
             - app_net
         # 容器名称
@@ -26,13 +27,18 @@ services:
             - "9000:9000"
         volumes:
             - "$PWD/html:/var/www/html"
+            - "$PWD/conf.d/ubuntu/sources.list:/etc/apt/sources.list"
         networks:
             - app_net
         container_name: "compose-php"
+        networks:
+            app_net:
+                # 固定子网ip，网段必须在子网络10.10.*.*
+                ipv4_address: 10.10.10.4
     mysql:
         image: mysql:5.7
         ports:
-            - "3306:3306"
+            - "53306:3306"
         # 环境变量
         environment:
             # mysql密码
@@ -42,6 +48,10 @@ services:
                 # 固定子网ip，网段必须在子网络10.10.*.*
                 ipv4_address: 10.10.10.1
         container_name: "compose-mysql"
+        volumes:
+            - $PWD/data/mysql:/var/lib/mysql/
+            - $PWD/conf.d/mysql/:/etc/mysql/conf.d/
+            - $PWD/logs/mysql/:/var/logs/mysql/
     redis:
         image: redis:4
         ports: 
@@ -55,18 +65,40 @@ services:
                 ipv4_address: 10.10.10.2
         container_name: "compose-redis"
     
-    #svn:
-        #build: ./subversion
-        #image: ubuntu
-        #container_name: "compose-svn"
-        #networks:
-            #- app_net
-        #ports:
-            #- "3690:3690"
-        #volumes:
-           # - "$PWD/subversion/src_store:/opt/svn/src_store"
-    
-            
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        hostname: phpmyadmin
+        restart: always
+        ports:
+            - 58080:80
+        depends_on:
+            - "mysql"
+        volumes:
+            - $PWD/sessions:/sessions
+            - $PWD/conf.d/phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+            - $PWD/conf.d/ubuntu/sources.list:/etc/apt/sources.list
+        environment:
+            #- PMA_ARBITRARY:1
+            - PMA_HOST:10.10.10.1
+            #- PMA_PORT:3306
+            #- "PMA_USER=root"
+            #- "PMA_PASSWORD=565859"
+        networks:
+            app_net:
+                # 固定子网ip，网段必须在子网络10.10.*.*
+                ipv4_address: 10.10.10.3
+    svn:
+        build: ./subversion
+        image: ubuntu
+        container_name: "compose-svn"
+        networks:
+            - app_net
+        ports:
+            - "3690:3690"
+        volumes:
+           - $PWD/subversion/src_store:/opt/svn/src_store
+           - $PWD/html:/var/www/html   
 networks:
     # 配置docker network
     app_net:
